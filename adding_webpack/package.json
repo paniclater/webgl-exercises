@@ -1,0 +1,10 @@
+{
+  "name": "setting-up",
+  "version": "1.0.0",
+  "description": "setting up webgl with webpack",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^3.5.5"
+  }
+}
