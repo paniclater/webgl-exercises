@@ -10,7 +10,4 @@ const app = id =>
       .map(() => gl.clearColor(1, 0, 1, 1))
       .map(() => gl.clear(gl.COLOR_BUFFER_BIT))))
 
-const result = app('canvas');
-
-
-result.run();
+app('canvas').run();
