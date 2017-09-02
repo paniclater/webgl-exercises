@@ -7,7 +7,10 @@ const app = id =>
     IO(() => canvas.getContext('webgl'))
     .bind(gl =>
       IO(() => gl.viewport(0, 0, canvas.width, canvas.height))
-      .map(() => gl.clearColor(1, 1, 0, 1))
+      .map(() => gl.clearColor(1, 0, 1, 1))
       .map(() => gl.clear(gl.COLOR_BUFFER_BIT))))
 
-app('canvas').run();
+const result = app('canvas');
+
+
+result.run();
