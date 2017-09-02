@@ -5,6 +5,11 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "clean-webpack-plugin": "^0.1.16",
+    "html-webpack-plugin": "^2.30.1",
     "webpack": "^3.5.5"
+  },
+  "scripts": {
+    "build": "webpack"
   }
 }
