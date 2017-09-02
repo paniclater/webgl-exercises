@@ -1,6 +1,6 @@
-const gl = document
-  .getElementById('canvas')
-  .getContext('webgl');
+document.write('<canvas id="canvas" height="600" width="600"></canvas>');
+const canvas = document.getElementById('canvas');
+const gl = canvas.getContext('webgl');
 
 initGl(gl);
 draw(gl);
