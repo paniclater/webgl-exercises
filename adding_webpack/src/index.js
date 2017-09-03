@@ -2,10 +2,10 @@ document.write('<canvas id="canvas" height="600" width="600"></canvas>');
 const canvas = document.getElementById('canvas');
 const gl = canvas.getContext('webgl');
 
-initGl(gl);
+initGl(gl, canvas);
 draw(gl);
 
-function initGl(gl) {
+function initGl(gl, canvas) {
   // set the viewport of the webl context
   //x of lower left corner, y of lower left corner, width and height
   //defaults to 0, 0, canvas width, canvas height, so this is not necessary unless the canvas will change size
