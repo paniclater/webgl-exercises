@@ -3,8 +3,8 @@ const { IO } = require('monet');
 //These are written in Open GL, a c like language for graphics
 //Be very careful here, everything will run in javascript land if these are invalid
 //But there will be a warning that it is an invalid program
-const vsString = () => "void main(void) { gl_Position = vec4(0.0, 0.0, 0.0, 1.0); gl_PointSize = 10.0; }";
-const fsString = () => "void main(void) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }";
+const vsString = () => "void main(void) { gl_Position = vec4(0.0, 0.0, 0.0, 1.0); gl_PointSize = 100.0; }";
+const fsString = () => "void main(void) { gl_FragColor = vec4(0.25, 1.0, 0.5, 1.0); }";
 
 const app = id =>
   IO(() => document.write(`<canvas id="${id}" height="600" width="600"></canvas>`))
