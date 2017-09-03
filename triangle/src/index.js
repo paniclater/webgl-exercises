@@ -3,72 +3,80 @@ const { IO } = require('monet');
 //These are written in Open GL, a c like language for graphics
 //Be very careful here, everything will run in javascript land if these are invalid
 //But there will be a warning that it is an invalid program
-const vsString = () => "attribute vec4 coords; attribute float pointSize; void main(void) { gl_Position = coords; gl_PointSize = pointSize; }";
-const fsString = () => "precision mediump float; uniform vec4 color; void main(void) { gl_FragColor = color; }";
-const vertices = () => [
-  -0.9, -0.9, 0.0,
-  0.9, -0.9, 0.0,
-  0.0, 0.9, 0.0
-];
+const vsString = () =>
+  "attribute vec4 coords; attribute float pointSize; void main(void) { gl_Position = coords; gl_PointSize = pointSize; }";
+const fsString = () =>
+  "precision mediump float; uniform vec4 color; void main(void) { gl_FragColor = color; }";
+const vertices = () =>
+  [
+    -0.9, -0.9, 0.0,
+    0.9, -0.9, 0.0,
+    0.0, 0.9, 0.0
+  ];
 
 
 //vertex shader handles point location and size
-const makeVertexShader =
-  (gl, program) => () =>
-    IO(() => vsString())
-      .bind(vs =>
-        IO(() => gl.createShader(gl.VERTEX_SHADER))
-          .bind(vertexShader =>
-            IO(() => gl.shaderSource(vertexShader, vs))
-              .map(() => gl.compileShader(vertexShader))
-              .map(() => gl.attachShader(program, vertexShader))
-      ));
+const makeVertexShader = (gl, program) => () =>
+  IO(() => vsString())
+  .bind(vs =>
+    IO(() => gl.createShader(gl.VERTEX_SHADER))
+    .bind(vertexShader =>
+      IO(() => gl.shaderSource(vertexShader, vs))
+      .map(() => gl.compileShader(vertexShader))
+      .map(() => gl.attachShader(program, vertexShader))
+  ));
 
 //fragment shader handles color
-const makeFragmentShader =
-  (gl, program) => () =>
-    IO(() => fsString())
-      .bind(fs =>
-        IO(() => gl.createShader(gl.FRAGMENT_SHADER))
-          .bind(fragmentShader =>
-            IO(() => gl.shaderSource(fragmentShader, fs))
-              .map(() => gl.compileShader(fragmentShader))
-              .map(() => gl.attachShader(program, fragmentShader))));
+const makeFragmentShader = (gl, program) => () =>
+  IO(() => fsString())
+  .bind(fs =>
+    IO(() => gl.createShader(gl.FRAGMENT_SHADER))
+    .bind(fragmentShader =>
+      IO(() => gl.shaderSource(fragmentShader, fs))
+      .map(() => gl.compileShader(fragmentShader))
+      .map(() => gl.attachShader(program, fragmentShader))));
 
-//const makeVertices =
-//  (gl, program) => () =>
-//    IO(() => gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()))
+const configureArrayBuffer = gl => coords =>
+  //bind the buffer
+  IO(() => gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()))
+  //use the coords attribute, three points, float values
+  .map(() => gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0))
+  //use the array buffer, send in our actual coords, use a static strategy to draw (very efficient, not dynamic)
+  .map(() => gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices()), gl.STATIC_DRAW))
+  //enable the array with our coords attribute
+  .map(() => gl.enableVertexAttribArray(coords))
+  //unbind the buffer
+  .map(() => gl.bindBuffer(gl.ARRAY_BUFFER, null))
 
 // must set attributes after program is linked
 //must set uniform after program is in use
-const initializeProgram =
-  (gl, program) => () =>
-    IO(() => gl.linkProgram(program))
-      .map(() => gl.useProgram(program))
-      .map(() => gl.vertexAttrib3f(gl.getAttribLocation(program, 'coords'), -0.5, -0.5, 0))
-      .map(() => gl.vertexAttrib1f(gl.getAttribLocation(program, 'pointSize'), 1000))
-      .map(() => gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1))
+const initializeProgram = (gl, program) => () =>
+  IO(() => gl.linkProgram(program))
+  .map(() => gl.useProgram(program))
+  .map(() => gl.getAttribLocation(program, 'coords'))
+  .bind(configureArrayBuffer(gl))
+  .map(() => gl.vertexAttrib1f(gl.getAttribLocation(program, 'pointSize'), 25))
+  .map(() => gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1))
 
-const draw = gl => () =>
-  IO(() => gl.clearColor(1, 0, 1, 1)) //sets the clear color
-    .map(() => gl.clear(gl.COLOR_BUFFER_BIT)) //actually draws the clear color
-    .map(() => gl.drawArrays(gl.POINTS, 0,1)) //
+const draw = gl => () => IO(() => gl.clearColor(1, 0, 1, 1)) //sets the clear color
+  .map(() => gl.clear(gl.COLOR_BUFFER_BIT)) //actually draws the clear color
+  .map(() => gl.drawArrays(gl.POINTS, 0, 3)) //
 
 const app = id =>
   IO(() => document.write(`<canvas id="${id}" height="600" width="600"></canvas>`))
-    .map(() => document.getElementById(id))
-      .bind(canvas =>
-        IO(() => canvas.getContext('webgl'))
-          .bind(gl =>
-            IO(() => gl.viewport(0, 0, canvas.width, canvas.height))
-              .map(() => gl.createProgram())
-              .bind(program =>
-                IO(() => program)
-                  .bind(makeVertexShader(gl, program))
-                  .bind(makeFragmentShader(gl, program))
-                  .bind(initializeProgram(gl, program))
-              )
-              .bind(draw(gl))
-            ));
+  .map(() => document.getElementById(id))
+  .bind(canvas =>
+    IO(() => canvas.getContext('webgl'))
+    .bind(gl =>
+      IO(() => gl.viewport(0, 0, canvas.width, canvas.height))
+      .map(() => gl.createProgram())
+      .bind(program =>
+        IO(() => program)
+        .bind(makeVertexShader(gl, program))
+        .bind(makeFragmentShader(gl, program))
+        .bind(initializeProgram(gl, program))
+      )
+      .bind(draw(gl))
+    ));
 
 app('canvas').run();
