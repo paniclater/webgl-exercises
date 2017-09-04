@@ -24,31 +24,22 @@ const makeShader = (gl, program, shaderScript, type) => IO(() => {
   gl.attachShader(program, shader);
 });
 
-const configureArrayBuffer = (gl, vertices) => coords =>
-  //bind the buffer
-  IO(() => {
-    return gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
-  })
-  //use the coords attribute, three points, float values
-  .map(() => gl.vertexAttribPointer(coords, 2, gl.FLOAT, false, 0, 0))
-  //use the array buffer, send in our actual coords, use a static strategy to draw (very efficient, not dynamic)
-  .map(() => gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW))
-  //enable the array with our coords attribute
-  .map(() => gl.enableVertexAttribArray(coords))
-  //unbind the buffer
-//.map(() => gl.bindBuffer(gl.ARRAY_BUFFER, null))
-  .map(() => vertices);
-
-// must set attributes after program is linked
-//must set uniform after program is in use
 const initializeProgram = (gl, program) => vertices =>
-  IO(() => gl.linkProgram(program))
-  .map(() => gl.useProgram(program))
-  .map(() => gl.getAttribLocation(program, 'coords'))
-  .bind(configureArrayBuffer(gl, vertices))
-  .map(() => gl.vertexAttrib1f(gl.getAttribLocation(program, 'pointSize'), 5))
-  .map(() => gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1))
-  .map(() => vertices);
+  IO(() => {
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    const coords = gl.getAttribLocation(program, 'coords');
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.vertexAttribPointer(coords, 2, gl.FLOAT, false, 0, 0);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(coords);
+    gl.vertexAttrib1f(gl.getAttribLocation(program, 'pointSize'), 5);
+    gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1);
+
+    return vertices
+  });
 
 const draw = (gl, vertices) => {
   return function () {
