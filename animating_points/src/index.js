@@ -1,34 +1,28 @@
 const { IO } = require('monet');
 
+const Impure = {
+  vertexShaderString: () => document.getElementById('vertex-shader').text,
+  fragmentShaderString: () => document.getElementById('fragment-shader').text,
+};
+
 const VERTEX_COUNT = 5000;
-//These are written in Open GL, a c like language for graphics
-//Be very careful here, everything will run in javascript land if these are invalid
-//But there will be a warning that it is an invalid program
-const vsString = () => document.getElementById('vertex-shader').text;
-const fsString = () => document.getElementById('fragment-shader').text;
 
-const vertices = () => new Array(VERTEX_COUNT * 2).fill().map(_ => Math.random() * 2 - 1);
+const ShaderTypes = {
+  FRAGMENT_SHADER: 'FRAGMENT_SHADER',
+  VERTEX_SHADER: 'VERTEX_SHADER'
+};
 
-//vertex shader handles point location and size
-const makeVertexShader = (gl, program) => () =>
-  IO(() => vsString())
-  .bind(vs =>
-    IO(() => gl.createShader(gl.VERTEX_SHADER))
-    .bind(vertexShader =>
-      IO(() => gl.shaderSource(vertexShader, vs))
-      .map(() => gl.compileShader(vertexShader))
-      .map(() => gl.attachShader(program, vertexShader))
-  ));
+const Pure = {
+  vertices: () => new Array(VERTEX_COUNT * 2).fill().map(_ => Math.random() * 2 - 1)
+};
 
-//fragment shader handles color
-const makeFragmentShader = (gl, program) => () =>
-  IO(() => fsString())
-  .bind(fs =>
-    IO(() => gl.createShader(gl.FRAGMENT_SHADER))
-    .bind(fragmentShader =>
-      IO(() => gl.shaderSource(fragmentShader, fs))
-      .map(() => gl.compileShader(fragmentShader))
-      .map(() => gl.attachShader(program, fragmentShader))));
+const makeShader = (gl, program, shaderScript, type) => IO(() => {
+  const shader = gl.createShader(gl[type]);
+
+  gl.shaderSource(shader, shaderScript);
+  gl.compileShader(shader);
+  gl.attachShader(program, shader);
+});
 
 const configureArrayBuffer = (gl, vertices) => coords =>
   //bind the buffer
@@ -79,9 +73,9 @@ const app = id =>
       .map(() => gl.createProgram())
       .bind(program =>
         IO(() => program)
-        .bind(makeVertexShader(gl, program))
-        .bind(makeFragmentShader(gl, program))
-        .map(() => vertices())
+        .bind(() => makeShader(gl, program, Impure.vertexShaderString(), ShaderTypes.VERTEX_SHADER))
+        .bind(() => makeShader(gl, program, Impure.fragmentShaderString(), ShaderTypes.FRAGMENT_SHADER))
+        .map(() => Pure.vertices())
         .bind(initializeProgram(gl, program))
         .bind(vs => {
           draw(gl, vs)();
