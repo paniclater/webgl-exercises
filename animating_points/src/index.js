@@ -9,7 +9,6 @@ const fsString = () => document.getElementById('fragment-shader').text;
 
 const vertices = () => new Array(VERTEX_COUNT * 2).fill().map(_ => Math.random() * 2 - 1);
 
-
 //vertex shader handles point location and size
 const makeVertexShader = (gl, program) => () =>
   IO(() => vsString())
