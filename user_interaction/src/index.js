@@ -4,8 +4,8 @@ const updateObject = (o1, o2) => Object.assign({}, o1, o2);
 const map = (value, minSrc, maxSrc, minDst, maxDst) => (value - minSrc) / (maxSrc - minSrc) * (maxDst - minDst) + minDst;
 const StateMachine = {
   state: {
-    x: null,
-    y: null
+    x: 1000,
+    y: 1000
   },
   getState: key => StateMachine.state[key],
   setState: newState => StateMachine.state = updateObject(StateMachine.state, newState)
@@ -35,7 +35,7 @@ const flatten = arr => arr.reduce((a, b) => {
 }, []);
 
 const initializeCanvasAndProgram  = id => {
-  document.write(`<canvas id="${id}" height="${window.innerHeight}" width="${window.innerWidth}"></canvas>`);
+  document.write(`<canvas id="${id}" style="position: absolute;" height="${window.innerHeight}" width="${window.innerWidth}"></canvas>`);
 
   const canvas = document.getElementById(id);
   canvas.addEventListener('mousemove', event => {
@@ -69,7 +69,7 @@ const initializeBuffers = (gl, program, vertices) => {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatten(vertices)), gl.DYNAMIC_DRAW);
   gl.enableVertexAttribArray(coords);
   gl.vertexAttrib1f(gl.getAttribLocation(program, 'pointSize'), 5);
-  gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1);
+  gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, .9);
 };
 
 const draw = (gl, vertices) => () => {
@@ -87,7 +87,7 @@ const draw = (gl, vertices) => () => {
     const velocity = y >= 0 ?
       (Math.abs(y - 1.5) + 0.01) * 0.03 :
       (Math.abs(y) + 1) * 0.03
-    if (dist < .3) {
+    if (dist < .9) {
       return [
         x + Math.random() * 0.01 - 0.005,
         y + .02
@@ -116,6 +116,8 @@ const app = id =>
     makeShader(gl, program, vertexShaderString(), ShaderTypes.VERTEX_SHADER);
     makeShader(gl, program, fragmentShaderString(), ShaderTypes.FRAGMENT_SHADER);
     initializeBuffers(gl, program, vs);
+    const style = "position: absolute; z-index: 100; font-family: sans-serif; font-size: 5em; font-weight: 900; width: 100%; text-align: center; color: pink;"
+  document.write(`<div style="${style}">bogosorting</div>`);
     draw(gl, vs)();
   });
 
