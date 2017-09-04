@@ -1,15 +1,13 @@
 const { IO } = require('monet');
 
-const vertexShaderString = () => document.getElementById('vertex-shader').text;
-const fragmentShaderString = () => document.getElementById('fragment-shader').text;
-
 const VERTEX_COUNT = 5000;
-
 const ShaderTypes = {
   FRAGMENT_SHADER: 'FRAGMENT_SHADER',
   VERTEX_SHADER: 'VERTEX_SHADER'
 };
 
+const vertexShaderString = () => document.getElementById('vertex-shader').text;
+const fragmentShaderString = () => document.getElementById('fragment-shader').text;
 const vertices = () => new Array(VERTEX_COUNT * 2).fill().map(_ => Math.random() * 2 - 1);
 
 const initializeCanvasAndProgram  = id => {
@@ -54,7 +52,6 @@ const draw = (gl, vertices) => () => {
 
   requestAnimationFrame(draw(gl, newVs));
 };
-
 
 const app = id =>
   IO(() => {
