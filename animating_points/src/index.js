@@ -57,19 +57,6 @@ const initializeProgram = (gl, program) => vertices =>
   .map(() => gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1))
   .map(() => vertices);
 
-//function draw(gl) {
-//  return function(vertices) {
-//    return IO(() => vertices.map(v => v + Math.random() * 0.01 - 0.005))
-//    .map(vs => gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vs)))
-//    .map(() => gl.clearColor(1, 0, 1, 1))
-//    .map(() => gl.clear(gl.COLOR_BUFFER_BIT))
-//    .map(() => gl.drawArrays(gl.POINTS, 0, VERTEX_COUNT))
-//    .map(() => {
-//      return requestAnimationFrame(draw(gl)(vertices).run());
-//    });
-//  }
-//}
-
 const draw = (gl, vertices) => {
   return function () {
     const newVs = vertices.map(v => v + Math.random() * 0.01 - 0.005);
