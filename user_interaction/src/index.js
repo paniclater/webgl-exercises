@@ -4,8 +4,8 @@ const updateObject = (o1, o2) => Object.assign({}, o1, o2);
 const map = (value, minSrc, maxSrc, minDst, maxDst) => (value - minSrc) / (maxSrc - minSrc) * (maxDst - minDst) + minDst;
 const StateMachine = {
   state: {
-    x: null,
-    y: null
+    x: 1000,
+    y: 1000
   },
   getState: key => StateMachine.state[key],
   setState: newState => StateMachine.state = updateObject(StateMachine.state, newState)
@@ -19,7 +19,7 @@ const ShaderTypes = {
 
 const vertexShaderString = () => document.getElementById('vertex-shader').text;
 const fragmentShaderString = () => document.getElementById('fragment-shader').text;
-const vertices = () => new Array(VERTEX_COUNT).fill().map(_ => [Math.random() * 2 - 1, Math.random() * 2 - 1]);
+const vertices = () => new Array(VERTEX_COUNT).fill().map(_ => [Math.random() * 2 - 1, Math.random() * 5 + 1]);
 const xAndYs = arr => arr.reduce((a, b, i) => ({
   x: b % 2 === 0 ? a.x.concat([b]) : a.x,
   y: b % 2 !== 0 ? a.y.concat([b]) : a.y
@@ -35,7 +35,7 @@ const flatten = arr => arr.reduce((a, b) => {
 }, []);
 
 const initializeCanvasAndProgram  = id => {
-  document.write(`<canvas id="${id}" height="${window.innerHeight}" width="${window.innerWidth}"></canvas>`);
+  document.write(`<canvas id="${id}" style="position: absolute;" height="${window.innerHeight}" width="${window.innerWidth}"></canvas>`);
 
   const canvas = document.getElementById(id);
   canvas.addEventListener('mousemove', event => {
@@ -69,7 +69,7 @@ const initializeBuffers = (gl, program, vertices) => {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatten(vertices)), gl.DYNAMIC_DRAW);
   gl.enableVertexAttribArray(coords);
   gl.vertexAttrib1f(gl.getAttribLocation(program, 'pointSize'), 5);
-  gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, 1);
+  gl.uniform4f(gl.getUniformLocation(program, 'color'), .25, 1, .75, .9);
 };
 
 const draw = (gl, vertices) => () => {
@@ -77,25 +77,29 @@ const draw = (gl, vertices) => () => {
     const x = arr[0];
     const y = arr[1];
 
-    if ( x < -1 || x > 1 || y < -1 || y > 1) {
-      return [Math.random() * 2 - 1, Math.random() * 2 - 1];
+    if ( x < -1 || x > 1 || y < -1 || y > 1.2) {
+      return [Math.random() * 2 - 1, Math.random() * .5 + 1];
     }
 
     const dx = x - StateMachine.getState('x');
     const dy = y - StateMachine.getState('y');
     const dist = Math.sqrt(dx * dx + dy * dy);
     const velocity = y >= 0 ?
-      (Math.abs(y - 1) + 0.01) * 0.02 :
-      (Math.abs(y) + 1) * 0.02;
-    if (Math.abs(dx) < 0.1) {
+      (Math.abs(y - 1.5) + 0.01) * 0.03 :
+      (Math.abs(y) + 1) * 0.03
+    if (dist < .9) {
       return [
-        x,
-        y - velocity
+        x + Math.random() * 0.01 - 0.005,
+        y + .02
       ];
     }
 
-    return [x + Math.random() * 0.01 - 0.005, y + 0.001 + Math.random() * 0.01 - 0.005]
+    return [
+      x + Math.random() * 0.01 - 0.005,
+      y - velocity
+    ];
   });
+
   gl.clearColor(1, 0, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(flatten(newVs)));
@@ -112,6 +116,8 @@ const app = id =>
     makeShader(gl, program, vertexShaderString(), ShaderTypes.VERTEX_SHADER);
     makeShader(gl, program, fragmentShaderString(), ShaderTypes.FRAGMENT_SHADER);
     initializeBuffers(gl, program, vs);
+    const style = "position: absolute; z-index: 100; font-family: sans-serif; font-size: 5em; font-weight: 900; width: 100%; text-align: center; color: pink;"
+  document.write(`<div style="${style}">bogosorting</div>`);
     draw(gl, vs)();
   });
 
