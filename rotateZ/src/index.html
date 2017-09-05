@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Using a Template</title>
+  </head>
+  <body>
+  <script id="vertex-shader" type="x-shader/x-fragment">
+    attribute vec4 coords;
+    attribute float pointSize;
+    uniform mat4 transformMatrix;
+
+    void main(void) {
+      gl_Position = transformMatrix * coords;
+      gl_PointSize = pointSize;
+    }
+  </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      uniform vec4 color;
+
+      void main(void) {
+        gl_FragColor = color;
+      }
+    </script>
+  </body>
+<inital-scale=1/html>
