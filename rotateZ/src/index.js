@@ -8,6 +8,26 @@ const StateMachine = {
   getState: key => StateMachine.state[key],
   setState: newState => StateMachine.state = updateObject(StateMachine.state, newState)
 };
+const getRotationMatrices = (cos, sin) => ({
+  X: new Float32Array([
+    1, 0, 0, 0,
+    0, cos, -sin, 0,
+    0, sin, cos, 0,
+    0, 0, 0, 1
+  ]),
+  Y: new Float32Array([
+    cos, 0, sin, 0,
+    0, 1, 0, 0,
+    -sin, 0, cos, 0,
+    0, 0, 0, 1
+  ]),
+  Z: new Float32Array([
+    cos, -sin, 0, 0,
+    sin, cos, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+  ])
+});
 const ShaderTypes = {
   FRAGMENT_SHADER: 'FRAGMENT_SHADER',
   VERTEX_SHADER: 'VERTEX_SHADER'
@@ -16,17 +36,10 @@ const ShaderTypes = {
 const vertexShaderString = () => document.getElementById('vertex-shader').text;
 const fragmentShaderString = () => document.getElementById('fragment-shader').text;
 
-const rotateY = (angle, gl, program) => {
+const rotate = (angle, gl, program, type) => {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
-  const matrix = new Float32Array([
-    cos, 0, sin, 0,
-    0, 1, 0, 0,
-    -sin, 0, cos, 0,
-    0, 0, 0, 1
-  ]);
-  const transformMatrix = gl.getUniformLocation(program, 'transformMatrix');
-  gl.uniformMatrix4fv(transformMatrix, false, matrix);
+  gl.uniformMatrix4fv(gl.getUniformLocation(program, 'transformMatrix'), false, getRotationMatrices(cos, sin)[type]);
 };
 
 const initializeCanvasAndProgram  = id => {
@@ -64,7 +77,7 @@ const initializeBuffers = (gl, program, vertices) => {
 
 const draw = (gl, program) => () => {
   StateMachine.setState({ angle: StateMachine.getState('angle') + 0.01 });
-  rotateY(StateMachine.getState('angle'), gl, program)
+  rotate(StateMachine.getState('angle'), gl, program, 'Z');
   gl.clearColor(1, 0, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
